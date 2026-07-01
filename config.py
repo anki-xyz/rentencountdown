@@ -15,11 +15,17 @@ OLED_HEIGHT = 32
 OLED_ROTATE = 0
 
 # TTS / Audio
-TTS_BINARY_CANDIDATES = ("espeak-ng", "espeak")
+TTS_BINARY_CANDIDATES = ("piper", "espeak-ng", "espeak")
 TTS_VOICE = "de"
 TTS_SPEED_WPM = 145
 TTS_VOLUME = 180  # 0..200
 AUDIO_PLAYER_CANDIDATES = ("aplay",)
+
+# Piper-specific defaults (adjust to your environment if different)
+PIPER_BIN = Path.home() / "piper-venv" / "bin" / "piper"
+# Path to a Piper model (onnx). If None, code will try to call piper without --model.
+PIPER_MODEL = Path.home() / ".local" / "share" / "piper" / "de_DE-kerstin-low.onnx"
+PIPER_OUTPUT_FLAG = "--output_file"
 
 # Dateien / Logging
 APP_DIR = Path.home() / ".local" / "share" / "renten_countdown"
