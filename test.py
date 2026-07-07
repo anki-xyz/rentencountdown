@@ -18,7 +18,7 @@ def test_oled() -> None:
 
 def test_tts_audio() -> None:
     wav_file = synthesize_to_wav(
-        "Lieber Ludwig, dies ist ein Test der Sprachansage."
+        "Hallo Ludwig, wir zählen zusammen die Tage bis zu Deiner Rente!"
     )
     play_wav(wav_file)
 

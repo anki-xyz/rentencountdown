@@ -8,7 +8,11 @@ import config
 
 
 def _find_tts_binary() -> str:
-    # If a Piper binary path is configured and exists, prefer it.
+    """Return a valid Piper binary path.
+
+    Prefers `config.PIPER_BIN` if set; falls back to locating `piper` on PATH.
+    Raises FileNotFoundError if Piper cannot be found.
+    """
     try:
         piper_path = config.PIPER_BIN
     except AttributeError:
@@ -19,65 +23,42 @@ def _find_tts_binary() -> str:
         if p.exists() and p.is_file():
             return str(p)
 
-    for candidate in config.TTS_BINARY_CANDIDATES:
-        path = shutil.which(candidate)
-        if path:
-            return path
-    raise FileNotFoundError(
-        "Kein TTS-Binary gefunden. Installiere 'piper', 'espeak-ng' oder 'espeak'."
-    )
+    path = shutil.which("piper") or shutil.which("piper.exe")
+    if path:
+        return path
+
+    raise FileNotFoundError("Kein Piper-Binary gefunden. Setze config.PIPER_BIN oder installiere 'piper'.")
 
 
 def synthesize_to_wav(text: str, output_file: Path | None = None) -> Path:
+    """Synthesize `text` to a WAV using Piper.
+
+    - Always uses Piper and writes to `output_file` (defaults to `config.TEMP_WAV_FILE`).
+    - Feeds Piper through an `echo text | piper ...` style pipeline.
+    """
     output_file = output_file or config.TEMP_WAV_FILE
     output_file.parent.mkdir(parents=True, exist_ok=True)
 
-    tts_bin = _find_tts_binary()
-    def _build_command_and_input(bin_path: str) -> tuple[list[str], bytes | None]:
-        name = Path(bin_path).name.lower()
-        # Piper: prefer passing text on stdin and specify model + output file
-        if "piper" in name:
-            cmd: list[str] = [bin_path]
-            # add model if configured
-            try:
-                model = config.PIPER_MODEL
-            except AttributeError:
-                model = None
-            if model:
-                cmd += ["--model", str(model)]
-            # voice may be mapped to Piper --voice if supported
-            if getattr(config, "TTS_VOICE", None):
-                cmd += ["--voice", config.TTS_VOICE]
-            # output flag
-            out_flag = getattr(config, "PIPER_OUTPUT_FLAG", "--output_file")
-            cmd += [out_flag, str(output_file)]
-            # Piper reads text from stdin
-            return cmd, text.encode()
+    piper_bin = _find_tts_binary()
 
-        # Fallback to espeak/espeak-ng style args
-        if "espeak" in name:
-            return (
-                [
-                    bin_path,
-                    "-v",
-                    config.TTS_VOICE,
-                    "-s",
-                    str(config.TTS_SPEED_WPM),
-                    "-a",
-                    str(config.TTS_VOLUME),
-                    "-w",
-                    str(output_file),
-                    text,
-                ],
-                None,
-            )
+    cmd: list[str] = [piper_bin]
+    model = getattr(config, "PIPER_MODEL", None)
+    if model:
+        cmd += ["--model", str(model)]
 
-        # Generic fallback — pass output file then text as arg
-        return [bin_path, str(output_file), text], None
+    out_flag = getattr(config, "PIPER_OUTPUT_FLAG", "--output_file")
+    cmd += [out_flag, str(output_file)]
 
-    cmd, stdin_data = _build_command_and_input(tts_bin)
-    if stdin_data is not None:
-        subprocess.run(cmd, input=stdin_data, check=True)
-    else:
-        subprocess.run(cmd, check=True)
+    try:
+        echo = subprocess.Popen(
+            ["echo", text],
+            stdout=subprocess.PIPE,
+        )
+        subprocess.run(cmd, stdin=echo.stdout, check=True)
+        if echo.stdout:
+            echo.stdout.close()
+        echo.wait()
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(f"Piper synthesis failed: {exc}") from exc
+
     return output_file

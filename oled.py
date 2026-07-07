@@ -9,14 +9,20 @@ from luma.oled.device import ssd1306
 import config
 
 
+class PersistentSSD1306(ssd1306):
+    def cleanup(self) -> None:
+        pass
+
+
 class OledDisplay:
     def __init__(self) -> None:
         serial = i2c(port=config.OLED_I2C_PORT, address=config.OLED_I2C_ADDRESS)
-        self.device = ssd1306(
+        self.device = PersistentSSD1306(
             serial,
             width=config.OLED_WIDTH,
             height=config.OLED_HEIGHT,
             rotate=config.OLED_ROTATE,
+            persist=True,
         )
         self.font = ImageFont.load_default()
 
@@ -34,6 +40,7 @@ class OledDisplay:
             draw.text((0, y), line[:21], font=self.font, fill=255)
 
         self.device.display(image)
+        self.device.show()
 
     def show_countdown(self, headline: str, date_line: str, footer: str = "") -> None:
         lines = [headline, date_line]

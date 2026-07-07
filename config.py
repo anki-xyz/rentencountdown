@@ -31,7 +31,7 @@ PIPER_OUTPUT_FLAG = "--output_file"
 APP_DIR = Path.home() / ".local" / "share" / "renten_countdown"
 AUDIO_DIR = APP_DIR / "audio"
 LOG_DIR = APP_DIR / "logs"
-TEMP_WAV_FILE = AUDIO_DIR / "latest.wav"
+TEMP_WAV_FILE = AUDIO_DIR / "out.wav"
 LOG_FILE = LOG_DIR / "app.log"
 
 # Kleine Sicherheitsreserve für Cron-Umgebung

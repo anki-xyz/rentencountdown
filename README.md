@@ -94,14 +94,19 @@ python3 test.py
 
 ## Cronjob
 
-Crontab öffnen:
+Crontab oeffnen:
 ```bash
 crontab -e
 ```
 
-Eintragen:
+Sprachansage um 07:00 und 19:00, OLED-Update jede Minute von 07:05 bis 18:59
+und von 19:05 bis 06:59:
 ```cron
 0 7,19 * * * cd /home/pi/renten_countdown && /usr/bin/python3 main.py >> /home/pi/.local/share/renten_countdown/logs/cron.log 2>&1
+5-59 7 * * * cd /home/pi/renten_countdown && /usr/bin/python3 main.py --display-only >> /home/pi/.local/share/renten_countdown/logs/cron.log 2>&1
+* 8-18 * * * cd /home/pi/renten_countdown && /usr/bin/python3 main.py --display-only >> /home/pi/.local/share/renten_countdown/logs/cron.log 2>&1
+5-59 19 * * * cd /home/pi/renten_countdown && /usr/bin/python3 main.py --display-only >> /home/pi/.local/share/renten_countdown/logs/cron.log 2>&1
+* 20-23,0-6 * * * cd /home/pi/renten_countdown && /usr/bin/python3 main.py --display-only >> /home/pi/.local/share/renten_countdown/logs/cron.log 2>&1
 ```
 
 ## Hinweis

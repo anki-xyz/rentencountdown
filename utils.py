@@ -2,10 +2,38 @@ from __future__ import annotations
 
 import logging
 import os
+import random
 from datetime import date, datetime
 from pathlib import Path
 
 import config
+
+ENCOURAGING_PHRASES = [
+    "Du schaffst das!",
+    "Das sitzen wir auf einer Backe ab!",
+    "Das geht ganz einfach!",
+    "Jeder Tag bringt dich ein Stueck näher ans Ziel.",
+    "Bald gehört der Wecker nicht mehr dir.",
+    "Der Endspurt läuft, und du machst das grossartig.",
+    "Noch ein bisschen durchhalten, dann beginnt die freie Zeit.",
+    "Die Rente winkt schon freundlich aus der Ferne.",
+    "Mit jedem Morgen wird der Abstand kleiner.",
+    "Du bist auf der Zielgeraden.",
+    "Bald ist mehr Zeit fuer alles, was Freude macht.",
+    "Der Countdown tickt zu deinen Gunsten.",
+    "Jeder Arbeitstag weniger ist ein kleiner Sieg.",
+    "Das Ziel ist näher, als es sich manchmal anfuehlt.",
+    "Bald kannst du den Tag in deinem eigenen Tempo starten.",
+    "Die Vorfreude darf ruhig jeden Tag grösser werden.",
+    "Stück fuer Stück rückt die Freiheit naeher.",
+    "Der Kalender arbeitet für dich.",
+    "Noch ein paar Schritte, dann ist es geschafft.",
+    "Bald beginnt ein richtig schönes neues Kapitel.",
+    "Eine neue Rente ist wie ein neues Leben!",
+    "Der Acker ruft schon!",
+    "Endlich mal Zeit um was zu arbeiten.",
+    "Was ist gelb und kann nicht schwimmen? Ein Bagger! Haha!"
+]
 
 
 def ensure_directories() -> None:
@@ -51,7 +79,8 @@ def retirement_status_text(today: date | None = None) -> tuple[int, str, str]:
     if days > 1:
         short = f"Noch {days} Tage"
         spoken = (
-            f"Lieber {config.PERSON_NAME}, du hast nur noch {days} Tage bis zur Rente."
+            f"Lieber {config.PERSON_NAME}, du hast nur noch {days} Tage bis zur Rente. "
+            f"{random.choice(ENCOURAGING_PHRASES)}"
         )
     elif days == 1:
         short = "Noch 1 Tag"
